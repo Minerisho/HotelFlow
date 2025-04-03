@@ -13,7 +13,8 @@ public class Usuario {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_usuario;
+    @Column(name = "id_usuario")
+    private Long idUsuario;
 
     @Column(name = "correo_electronico", nullable = false, unique = true)
     private String correoElectronico;
@@ -32,7 +33,7 @@ public class Usuario {
     private Rol rol;
     
     @Column(name = "fecha_creacion", updatable = false)
-    private LocalDateTime fecha_creacion;
+    private LocalDateTime fechaCreacion;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -40,7 +41,7 @@ public class Usuario {
     
     @PrePersist
     public void prePersist() {
-        this.fecha_creacion = LocalDateTime.now();
+        this.fechaCreacion = LocalDateTime.now();
         if (this.estado == null) {
             this.estado = Estado.ACTIVO;
         }
