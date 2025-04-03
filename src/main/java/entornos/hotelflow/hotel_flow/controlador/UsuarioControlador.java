@@ -47,7 +47,7 @@ public class UsuarioControlador {
     //Actualizar un Usuario
     @PutMapping("/")
     public ResponseEntity<Usuario> editar(@RequestBody Usuario usuario){
-        Usuario obj = usuarioService.buscarUsuario(usuario.getId_usuario());
+        Usuario obj = usuarioService.buscarUsuario(usuario.getIdUsuario());
         if (obj != null) {
             obj.setCorreoElectronico(usuario.getCorreoElectronico());
             obj.setContrasena(usuario.getContrasena());
