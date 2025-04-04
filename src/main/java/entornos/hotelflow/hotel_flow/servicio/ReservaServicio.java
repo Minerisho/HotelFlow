@@ -127,9 +127,9 @@ public class ReservaServicio implements IReservaServicio {
         }
 
         reserva.setEstado(Reserva.EstadoReserva.CONFIRMADA);
-        Reserva reservaCancelada = reservaRepositorio.save(reserva);
+        Reserva reservaConfirmada = reservaRepositorio.save(reserva);
 
-        return convertirAReservaDTO(reservaCancelada);
+        return convertirAReservaDTO(reservaConfirmada);
     } 
     
 
