@@ -123,7 +123,7 @@ public class ReservaServicio implements IReservaServicio {
     private ReservaDTO convertirAReservaDTO(Reserva reserva) {
 
         return new ReservaDTO(
-                reserva.getId_reserva(),
+                reserva.getIdReserva(),
                 reserva.getUsuario().getIdUsuario(),
                 reserva.getUsuario().getNombre() + " " + reserva.getUsuario().getApellido(),
                 reserva.getHabitacion().getIdHabitacion(),

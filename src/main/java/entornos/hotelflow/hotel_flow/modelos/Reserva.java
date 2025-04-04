@@ -14,7 +14,8 @@ public class Reserva {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_reserva;
+    @Column(name = "id_reserva")
+    private Integer idReserva;
 
     @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "id_usuario", nullable = false)
