@@ -51,7 +51,7 @@ public class ReservaServicio implements IReservaServicio {
 
 
         // 4. Calcular total (tarifa base * noches)
-        long noches = ChronoUnit.DAYS.between(reservaRequest.getFechaEntrada().toLocalDate(), reservaRequest.getFechaSalida().toLocalDate());
+        long noches = ChronoUnit.DAYS.between(reservaRequest.getFechaEntrada(), reservaRequest.getFechaSalida()) + 1;
         if (noches <= 0) noches = 1; // Mínimo 1 noche
         BigDecimal total = habitacion.getTarifaBase().multiply(BigDecimal.valueOf(noches));
 
@@ -116,6 +116,21 @@ public class ReservaServicio implements IReservaServicio {
         return convertirAReservaDTO(reservaCancelada);
     }
 
+    @Override
+    @Transactional
+    public ReservaDTO confirmarReserva(Integer idReserva) {
+        Reserva reserva = reservaRepositorio.findById(idReserva)
+                .orElseThrow(() -> new EntityNotFoundException("Reserva no encontrada con ID: " + idReserva));
+
+        if (reserva.getEstado() == Reserva.EstadoReserva.CONFIRMADA) {
+            throw new IllegalStateException("La reserva ya está CONFIRMADA.");
+        }
+
+        reserva.setEstado(Reserva.EstadoReserva.CONFIRMADA);
+        Reserva reservaCancelada = reservaRepositorio.save(reserva);
+
+        return convertirAReservaDTO(reservaCancelada);
+    } 
     
 
     // --- Métodos privados de conversión ---
@@ -123,7 +138,7 @@ public class ReservaServicio implements IReservaServicio {
     private ReservaDTO convertirAReservaDTO(Reserva reserva) {
 
         return new ReservaDTO(
-                reserva.getId_reserva(),
+                reserva.getIdReserva(),
                 reserva.getUsuario().getIdUsuario(),
                 reserva.getUsuario().getNombre() + " " + reserva.getUsuario().getApellido(),
                 reserva.getHabitacion().getIdHabitacion(),

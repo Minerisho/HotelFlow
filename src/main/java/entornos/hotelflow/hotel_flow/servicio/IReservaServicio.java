@@ -17,4 +17,6 @@ public interface IReservaServicio {
 
     ReservaDTO cancelarReserva(Integer idReserva);
 
+    ReservaDTO confirmarReserva(Integer idReserva);
+
 }

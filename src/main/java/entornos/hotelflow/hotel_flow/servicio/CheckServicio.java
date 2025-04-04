@@ -27,20 +27,20 @@ public class CheckServicio implements ICheckServicio {
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada con ID: " + checkInRequest.getIdReserva()));
 
         if (reserva.getEstado() != Reserva.EstadoReserva.CONFIRMADA) {
-            throw new RuntimeException("La reserva " + reserva.getId_reserva() + " no está confirmada. Estado actual: " + reserva.getEstado());
+            throw new RuntimeException("La reserva " + reserva.getIdReserva() + " no está confirmada. Estado actual: " + reserva.getEstado());
         }
 
         Habitacion habitacion = reserva.getHabitacion(); 
         if (habitacion == null) {
-            throw new RuntimeException("La reserva " + reserva.getId_reserva() + " no tiene una habitación asociada.");
+            throw new RuntimeException("La reserva " + reserva.getIdReserva() + " no tiene una habitación asociada.");
         }
         if (habitacion.getEstado() != Habitacion.EstadoHabitacion.DISPONIBLE) {
             throw new RuntimeException("La habitación " + habitacion.getNumero() + " no está disponible para check-in. Estado actual: " + habitacion.getEstado());
         }
 
-        checkLogRepositorio.findByReservaIdReservaAndCheckOutIsNull(reserva.getId_reserva())
+        checkLogRepositorio.findByReservaIdReservaAndCheckOutIsNull(reserva.getIdReserva())
                 .ifPresent(log -> {
-                    throw new RuntimeException("Ya existe un check-in activo para la reserva " + reserva.getId_reserva());
+                    throw new RuntimeException("Ya existe un check-in activo para la reserva " + reserva.getIdReserva());
                 });
 
  

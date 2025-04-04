@@ -22,7 +22,7 @@ public class CheckLogDTO {
         this.checkIn = checkLog.getCheckIn();
         this.checkOut = checkLog.getCheckOut();
         if (checkLog.getReserva() != null) {
-            this.idReserva = checkLog.getReserva().getId_reserva();
+            this.idReserva = checkLog.getReserva().getIdReserva();
              if (checkLog.getReserva().getHabitacion() != null) {
                  this.idHabitacion = checkLog.getReserva().getHabitacion().getIdHabitacion();
                  this.numeroHabitacion = checkLog.getReserva().getHabitacion().getNumero();
