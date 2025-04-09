@@ -36,6 +36,12 @@ public class UsuarioControlador {
     public Usuario buscarPorId(@PathVariable Long id){
         return usuarioService.buscarUsuario(id);
     }
+
+    // Obtener únicamente los usuarios con rol HUESPED
+    @GetMapping("/list/huespedes")
+    public List<Usuario> cargarUsuariosHuesped(){
+        return usuarioService.getUsuarioHuesped();
+    }
     
     //Agregar un Usuario
     @PostMapping("/")
@@ -47,7 +53,7 @@ public class UsuarioControlador {
     //Actualizar un Usuario
     @PutMapping("/")
     public ResponseEntity<Usuario> editar(@RequestBody Usuario usuario){
-        Usuario obj = usuarioService.buscarUsuario(usuario.getId_usuario());
+        Usuario obj = usuarioService.buscarUsuario(usuario.getIdUsuario());
         if (obj != null) {
             obj.setCorreoElectronico(usuario.getCorreoElectronico());
             obj.setContrasena(usuario.getContrasena());
