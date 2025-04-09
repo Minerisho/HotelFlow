@@ -1,5 +1,6 @@
 package entornos.hotelflow.hotel_flow.repositorio;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,7 @@ public interface UsuarioRepositorio extends JpaRepository<Usuario, Long> {
     
     @Query("SELECT u FROM Usuario u WHERE u.correoElectronico = :correo AND u.contrasena = :contrasena")
     Optional<Usuario> ingresar(@Param("correo") String correo, @Param("contrasena") String contrasena);
+
+    @Query("SELECT u FROM Usuario u WHERE u.rol = 'HUESPED'")
+    List<Usuario> obtenerUsuariosHuesped();
 }

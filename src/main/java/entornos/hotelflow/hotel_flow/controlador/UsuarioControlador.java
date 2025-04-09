@@ -36,6 +36,12 @@ public class UsuarioControlador {
     public Usuario buscarPorId(@PathVariable Long id){
         return usuarioService.buscarUsuario(id);
     }
+
+    // Obtener únicamente los usuarios con rol HUESPED
+    @GetMapping("/list/huespedes")
+    public List<Usuario> cargarUsuariosHuesped(){
+        return usuarioService.getUsuarioHuesped();
+    }
     
     //Agregar un Usuario
     @PostMapping("/")

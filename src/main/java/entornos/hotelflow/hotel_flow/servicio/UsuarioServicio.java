@@ -30,6 +30,11 @@ public class UsuarioServicio implements IUsuarioServicio {
     }
 
     @Override
+    public List<Usuario> getUsuarioHuesped(){
+        return usuarioRepositorio.obtenerUsuariosHuesped();
+    }
+    
+    @Override
     public Usuario buscarUsuario(Long id) {
         Usuario usuario = null;
         usuario = usuarioRepositorio.findById(id).orElse(null);

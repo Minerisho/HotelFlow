@@ -18,4 +18,6 @@ public interface IUsuarioServicio {
 
     int login(String correo, String contrasena);
     Usuario ingresar(LoginDTO loginDto);
+
+    List<Usuario> getUsuarioHuesped();
 }
