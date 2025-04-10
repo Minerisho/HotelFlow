@@ -78,3 +78,73 @@ Puedes ejecutar la aplicación de las siguientes maneras:
 La aplicación se iniciará por defecto en el puerto `8094`. Puedes acceder a ella en `http://localhost:8094`.
 
 ## Estructura del Proyecto
+HotelFlow_back/
+├── src/
+│   ├── main/
+│   │   ├── java/entornos/hotelflow/hotel_flow/
+│   │   │   ├── HotelFlowApplication.java   # Punto de entrada Spring Boot
+│   │   │   ├── config/                     # Clases de configuración (Security, CORS, Exceptions)
+│   │   │   ├── controlador/                # Controladores REST (API Endpoints)
+│   │   │   ├── modelos/                    # Entidades JPA y DTOs
+│   │   │   ├── repositorio/                # Interfaces de Repositorio JPA y algunas interfaces de servicio
+│   │   │   └── servicio/                   # Implementaciones e interfaces de lógica de negocio (Servicios)
+│   │   └── resources/
+│   │       └── application.properties      # Configuración de la aplicación
+│   └── test/                               # Clases de prueba
+├── pom.xml                                 # Configuración de Maven (dependencias, build)
+└── README.md                               # Esta documentación
+
+## API Endpoints
+
+La API base se encuentra en `/api`.
+
+### Autenticación (`/api/login`)
+
+* `POST /loginclient`: Valida las credenciales (`correoElectronico`, `contrasena`). Retorna `1` si es válido, `0` si no.
+* `POST /ingresar`: Valida las credenciales (`correoElectronico`, `contrasena`). Retorna los detalles del `Usuario` si es válido, o error 401 si no.
+
+### Usuarios (`/api/usuarios`)
+
+* `GET /list`: Obtiene la lista de todos los usuarios.
+* `GET /list/{id}`: Obtiene un usuario por su ID.
+* `GET /list/huespedes`: Obtiene la lista de usuarios con rol `HUESPED`.
+* `POST /`: Crea un nuevo usuario.
+* `PUT /`: Actualiza un usuario existente (requiere el objeto `Usuario` completo en el body, incluyendo el ID).
+* `DELETE /{id}`: Elimina un usuario por su ID.
+
+### Habitaciones (`/api/habitaciones`)
+
+* `GET /`: Obtiene la lista de todas las habitaciones.
+* `GET /{id}`: Obtiene una habitación por su ID.
+* `GET /numero/{numero}`: Obtiene una habitación por su número.
+* `GET /estado/{estado}`: Obtiene habitaciones por estado (e.g., `DISPONIBLE`, `OCUPADA`, `EN_LIMPIEZA`, `MANTENIMIENTO`).
+* `GET /tipo/{tipo}`: Obtiene habitaciones por tipo (e.g., `INDIVIDUAL`, `DOBLE`, `MATRIMONIAL`, `SUITE`).
+* `GET /capacidad/{capacidad}`: Obtiene habitaciones con capacidad mayor o igual a la especificada.
+* `GET /tarifa/{tarifaMaxima}`: Obtiene habitaciones con tarifa base menor o igual a la especificada.
+* `GET /filtrar?estado=...&tipo=...`: Obtiene habitaciones filtrando por estado y tipo simultáneamente.
+* `POST /`: Crea una nueva habitación.
+* `PUT /{id}`: Actualiza una habitación existente por su ID.
+* `DELETE /{id}`: Elimina una habitación por su ID.
+* `PATCH /{id}/estado`: Actualiza el estado de una habitación. Requiere un body JSON como `{"estado": "NUEVO_ESTADO"}`.
+
+### Reservas (`/api/reservas`)
+
+* `POST /`: Crea una nueva reserva. Requiere `ReservaRequestDTO` en el body (`idUsuario`, `idHabitacion`, `fechaEntrada`, `fechaSalida`).
+* `GET /{idReserva}`: Obtiene una reserva por su ID.
+* `GET /`: Obtiene la lista de todas las reservas.
+* `GET /usuario/{idUsuario}`: Obtiene las reservas de un usuario específico.
+* `PATCH /{idReserva}/cancelar`: Cambia el estado de una reserva a `CANCELADA`.
+* `PATCH /{idReserva}/confirmar`: Cambia el estado de una reserva a `CONFIRMADA`.
+
+### Check-in/Check-out (`/api/check`)
+
+* `POST /in`: Registra un check-in para una reserva. Requiere `CheckInRequestDTO` en el body (`{"idReserva": ID}`). Cambia el estado de la habitación a `OCUPADA`.
+* `POST /out/{idCheckLog}`: Registra un check-out para un log de check-in específico. Cambia el estado de la habitación a `EN_LIMPIEZA`.
+* `GET /{idCheckLog}`: Obtiene los detalles de un log de check-in/check-out por su ID.
+
+## Esquema Básico de Base de Datos (Conceptual)
+
+* **Usuarios:** Almacena información de los usuarios (admin, recepcionista, huésped) y sus credenciales.
+* **Habitaciones:** Define las habitaciones del hotel, sus características (tipo, capacidad, tarifa) y estado actual.
+* **Reservas:** Vincula un `Usuario` con una `Habitacion` para un período específico (`fechaEntrada`, `fechaSalida`), almacena el costo total y el estado de la reserva.
+* **Check_Logs:** Registra los eventos de check-in y check-out, vinculados a una `Reserva`.
