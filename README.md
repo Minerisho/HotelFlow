@@ -77,7 +77,7 @@ Puedes ejecutar la aplicación de las siguientes maneras:
 
 La aplicación se iniciará por defecto en el puerto `8094`. Puedes acceder a ella en `http://localhost:8094`.
 
-## Estructura del Proyecto
+```
 HotelFlow_back/
 ├── src/
 │   ├── main/
@@ -93,7 +93,7 @@ HotelFlow_back/
 │   └── test/                               # Clases de prueba
 ├── pom.xml                                 # Configuración de Maven (dependencias, build)
 └── README.md                               # Esta documentación
-
+```
 ## API Endpoints
 
 La API base se encuentra en `/api`.
