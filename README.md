@@ -77,6 +77,8 @@ Puedes ejecutar la aplicación de las siguientes maneras:
 
 La aplicación se iniciará por defecto en el puerto `8094`. Puedes acceder a ella en `http://localhost:8094`.
 
+## Estructura del Proyecto
+
 ```
 HotelFlow_back/
 ├── src/
