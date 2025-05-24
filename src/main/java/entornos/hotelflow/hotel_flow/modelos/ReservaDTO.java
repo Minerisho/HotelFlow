@@ -2,37 +2,47 @@ package entornos.hotelflow.hotel_flow.modelos;
 
 import lombok.Getter;
 import lombok.Setter;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class ReservaDTO {
     private Integer idReserva;
-    private Long idUsuario; 
-    private String nombreUsuario; 
-    private Integer idHabitacion; 
-    private String numeroHabitacion; 
-    private LocalDateTime fechaEntrada;
-    private LocalDateTime fechaSalida;
-    private String estado; 
-    private BigDecimal totalReserva;
-    private LocalDateTime fechaCreacion;
+    private Integer idCliente;
+    private String nombreCliente; // Para fácil visualización
+    private Integer numeroHabitacion;
+    private String tipoHabitacion; // Para fácil visualización
+    private LocalDate fechaLlegadaEstadia; // Directo de la reserva
+    private LocalDate fechaSalidaEstadia;  // Directo de la reserva
+    private String estadoReserva;
+    private String tipoPago;
+    private LocalDate fechaReserva; // Fecha de creación de la reserva
 
-    // Constructor vacío
-    public ReservaDTO() {}
-
-    // Constructor completo 
-    public ReservaDTO(Integer idReserva, Long idUsuario, String nombreUsuario, Integer idHabitacion, String numeroHabitacion, LocalDateTime fechaEntrada, LocalDateTime fechaSalida, String estado, BigDecimal totalReserva, LocalDateTime fechaCreacion) {
-        this.idReserva = idReserva;
-        this.idUsuario = idUsuario;
-        this.nombreUsuario = nombreUsuario;
-        this.idHabitacion = idHabitacion;
-        this.numeroHabitacion = numeroHabitacion;
-        this.fechaEntrada = fechaEntrada;
-        this.fechaSalida = fechaSalida;
-        this.estado = estado;
-        this.totalReserva = totalReserva;
-        this.fechaCreacion = fechaCreacion;
+    // Constructor mejorado
+    public ReservaDTO(Reserva reserva, String nombreCliente, String tipoHabitacion) {
+        this.idReserva = reserva.getIdReserva();
+        this.idCliente = reserva.getCliente().getIdCliente();
+        this.nombreCliente = nombreCliente; // Se pasa externamente tras cargar el cliente
+        this.numeroHabitacion = reserva.getHabitacion().getNumeroHabitacion();
+        this.tipoHabitacion = tipoHabitacion; // Se pasa externamente tras cargar la habitación
+        this.fechaLlegadaEstadia = reserva.getFechaLlegadaEstadia();
+        this.fechaSalidaEstadia = reserva.getFechaSalidaEstadia();
+        this.estadoReserva = reserva.getEstado().name();
+        this.tipoPago = reserva.getTipoPago().name();
+        this.fechaReserva = reserva.getFechaReserva();
+    }
+    
+    // Constructor simple si solo tienes la reserva (cliente y habitacion se obtendrán por ID si es necesario)
+    public ReservaDTO(Reserva reserva) {
+        this.idReserva = reserva.getIdReserva();
+        this.idCliente = reserva.getCliente().getIdCliente();
+        this.numeroHabitacion = reserva.getHabitacion().getNumeroHabitacion();
+        this.fechaLlegadaEstadia = reserva.getFechaLlegadaEstadia();
+        this.fechaSalidaEstadia = reserva.getFechaSalidaEstadia();
+        this.estadoReserva = reserva.getEstado().name();
+        this.tipoPago = reserva.getTipoPago().name();
+        this.fechaReserva = reserva.getFechaReserva();
     }
 }

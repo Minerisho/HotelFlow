@@ -2,232 +2,247 @@ package entornos.hotelflow.hotel_flow.servicio;
 
 import entornos.hotelflow.hotel_flow.modelos.Habitacion;
 import entornos.hotelflow.hotel_flow.modelos.HabitacionDTO;
+import entornos.hotelflow.hotel_flow.modelos.Reserva; // Importado para lógica de eliminación
 import entornos.hotelflow.hotel_flow.repositorio.HabitacionRepositorio;
-import entornos.hotelflow.hotel_flow.repositorio.IHabitacionServicio;
-
+import entornos.hotelflow.hotel_flow.repositorio.ReservaRepositorio; // Importado para lógica de eliminación y disponibilidad
+import jakarta.persistence.criteria.Predicate; // Para Specification
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification; // Para Specification
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList; // Para Specification
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class HabitacionServicio implements IHabitacionServicio {
-    
+
     @Autowired
     private HabitacionRepositorio habitacionRepositorio;
-    
+
+    @Autowired
+    private ReservaRepositorio reservaRepositorio; // Para verificar disponibilidad y dependencias
+
+    // --- Implementación de métodos solicitados por el compilador ---
+
     @Override
     @Transactional(readOnly = true)
-    public List<HabitacionDTO> listarTodas() {
+    public HabitacionDTO obtenerHabitacionPorNumero(int numero) {
+        return habitacionRepositorio.findById(numero)
+                .map(HabitacionDTO::new)
+                .orElseThrow(() -> new RuntimeException("Habitación no encontrada con número: " + numero + " (método directo DTO)"));
+    }
+
+    @Override
+    @Transactional
+    public Habitacion guardarHabitacion(Habitacion habitacion) {
+        // Este método devuelve la entidad. Podría ser usado internamente o si se decide no usar DTO para la creación.
+        // Si 'crearHabitacion' ya existe y hace lo mismo pero devuelve DTO, se puede unificar.
+        if (habitacionRepositorio.findById(habitacion.getNumeroHabitacion()).isPresent()) {
+            throw new IllegalArgumentException("Habitación con número " + habitacion.getNumeroHabitacion() + " ya existe.");
+        }
+        habitacion.setEstado(Habitacion.EstadoHabitacion.LIBRE); // Estado por defecto al guardar
+        habitacion.setDisponible(true); // Disponible por defecto
+        return habitacionRepositorio.save(habitacion);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HabitacionDTO> buscarPorEstado(Habitacion.EstadoHabitacion estado) {
+        return habitacionRepositorio.findByEstado(estado).stream()
+                .map(HabitacionDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HabitacionDTO> buscarPorTipo(Habitacion.TipoHabitacion tipo) {
+        return habitacionRepositorio.findByTipo(tipo).stream()
+                .map(HabitacionDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HabitacionDTO> buscarHabitacionesDisponibles() {
+        // Devuelve habitaciones donde el campo 'disponible' es TRUE
+        return habitacionRepositorio.findByDisponibleTrue().stream()
+                .map(HabitacionDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    // --- Implementación de métodos que ya teníamos/refinamos ---
+
+    @Override
+    @Transactional
+    public HabitacionDTO crearHabitacion(Habitacion habitacion) {
+        // Este es el método que devuelve DTO, preferido para los controladores.
+        Habitacion guardada = guardarHabitacion(habitacion); // Reutiliza la lógica de guardarEntidad
+        return new HabitacionDTO(guardada);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HabitacionDTO> obtenerTodasLasHabitaciones() {
         return habitacionRepositorio.findAll().stream()
-                .map(this::convertirADTO)
+                .map(HabitacionDTO::new)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     @Transactional(readOnly = true)
-    public HabitacionDTO buscarPorId(Integer id) {
-        return habitacionRepositorio.findById(id)
-                .map(this::convertirADTO)
-                .orElse(null);
+    public Optional<HabitacionDTO> obtenerHabitacionDTOPorNumero(int numero) {
+        return habitacionRepositorio.findById(numero).map(HabitacionDTO::new);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
-    public HabitacionDTO buscarPorNumero(String numero) {
-        return habitacionRepositorio.findByNumero(numero)
-                .map(this::convertirADTO)
-                .orElse(null);
+    public Optional<Habitacion> obtenerHabitacionEntidadPorNumero(int numero) {
+        return habitacionRepositorio.findById(numero);
     }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public List<HabitacionDTO> buscarPorEstado(String estado) {
-        try {
-            Habitacion.EstadoHabitacion estadoEnum = Habitacion.EstadoHabitacion.valueOf(estado.toUpperCase());
-            return habitacionRepositorio.findByEstado(estadoEnum).stream()
-                    .map(this::convertirADTO)
-                    .collect(Collectors.toList());
-        } catch (IllegalArgumentException e) {
-            return List.of();
-        }
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public List<HabitacionDTO> buscarPorTipo(String tipo) {
-        try {
-            Habitacion.TipoHabitacion tipoEnum = Habitacion.TipoHabitacion.valueOf(tipo.toUpperCase());
-            return habitacionRepositorio.findByTipo(tipoEnum).stream()
-                    .map(this::convertirADTO)
-                    .collect(Collectors.toList());
-        } catch (IllegalArgumentException e) {
-            return List.of();
-        }
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public List<HabitacionDTO> buscarPorCapacidadMinima(Integer capacidad) {
-        return habitacionRepositorio.findByCapacidadGreaterThanEqual(capacidad).stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public List<HabitacionDTO> buscarPorTarifaMaxima(BigDecimal tarifaMaxima) {
-        return habitacionRepositorio.findByTarifaBaseLessThanEqual(tarifaMaxima).stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public List<HabitacionDTO> buscarPorEstadoYTipo(String estado, String tipo) {
-        try {
-            Habitacion.EstadoHabitacion estadoEnum = Habitacion.EstadoHabitacion.valueOf(estado.toUpperCase());
-            Habitacion.TipoHabitacion tipoEnum = Habitacion.TipoHabitacion.valueOf(tipo.toUpperCase());
-            
-            return habitacionRepositorio.buscarPorEstadoYTipo(estadoEnum, tipoEnum).stream()
-                    .map(this::convertirADTO)
-                    .collect(Collectors.toList());
-        } catch (IllegalArgumentException e) {
-            return List.of();
-        }
-    }
-    
+
     @Override
     @Transactional
-    public HabitacionDTO guardar(HabitacionDTO habitacionDTO) {
-        if (habitacionDTO.getNumero() != null && 
-                habitacionRepositorio.existsByNumero(habitacionDTO.getNumero())) {
-            throw new RuntimeException("Ya existe una habitación con el número: " + habitacionDTO.getNumero());
+    public HabitacionDTO actualizarHabitacion(int numero, Habitacion habitacionDetalles) {
+        Habitacion habitacionExistente = obtenerHabitacionEntidadPorNumero(numero)
+                .orElseThrow(() -> new RuntimeException("Habitación no encontrada con número: " + numero));
+
+        if (habitacionDetalles.getTipo() != null) {
+            habitacionExistente.setTipo(habitacionDetalles.getTipo());
         }
-        
-        Habitacion habitacion = convertirAEntidad(habitacionDTO);
-        Habitacion guardada = habitacionRepositorio.save(habitacion);
-        return convertirADTO(guardada);
+        if (habitacionDetalles.getClimatizacion() != null) {
+            habitacionExistente.setClimatizacion(habitacionDetalles.getClimatizacion());
+        }
+        if (habitacionDetalles.getEstado() != null) {
+            habitacionExistente.setEstado(habitacionDetalles.getEstado());
+            if(habitacionDetalles.getEstado() == Habitacion.EstadoHabitacion.OCUPADO) {
+                habitacionExistente.setDisponible(false);
+            } else if (habitacionDetalles.getEstado() == Habitacion.EstadoHabitacion.LIBRE || habitacionDetalles.getEstado() == Habitacion.EstadoHabitacion.LIMPIEZA) {
+                // Verificar si hay reservas para hoy antes de marcar como disponible
+                 List<Reserva> reservasHoy = reservaRepositorio.findReservasActivasSolapadas(numero, LocalDate.now(), LocalDate.now().plusDays(1));
+                 habitacionExistente.setDisponible(reservasHoy.isEmpty());
+            }
+        }
+        if (habitacionDetalles.getDisponible() != null) { // Permite override explícito
+            habitacionExistente.setDisponible(habitacionDetalles.getDisponible());
+        }
+        if (habitacionDetalles.getPrecio() != null && habitacionDetalles.getPrecio().compareTo(BigDecimal.ZERO) >= 0) {
+            habitacionExistente.setPrecio(habitacionDetalles.getPrecio());
+        }
+        Habitacion actualizada = habitacionRepositorio.save(habitacionExistente);
+        return new HabitacionDTO(actualizada);
     }
-    
+
     @Override
     @Transactional
-    public HabitacionDTO actualizar(Integer id, HabitacionDTO habitacionDTO) {
-        Optional<Habitacion> habitacionExistente = habitacionRepositorio.findById(id);
+    public void eliminarHabitacion(int numero) {
+        Habitacion habitacion = obtenerHabitacionEntidadPorNumero(numero)
+            .orElseThrow(() -> new RuntimeException("Habitación no encontrada con número: " + numero));
         
-        if (habitacionExistente.isEmpty()) {
-            return null;
+        List<Reserva> reservasAsociadas = reservaRepositorio.findReservasActivasSolapadas(numero, LocalDate.MIN, LocalDate.MAX)
+            .stream()
+            .filter(r -> r.getFechaSalidaEstadia().isAfter(LocalDate.now().minusDays(1)) && r.getEstado() != Reserva.EstadoReserva.CANCELADA) // Reservas activas o futuras
+            .toList();
+
+        if (!reservasAsociadas.isEmpty()){
+            throw new IllegalStateException("No se puede eliminar la habitación " + numero + " porque tiene reservas activas o futuras.");
+        }
+        habitacionRepositorio.delete(habitacion);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HabitacionDTO> buscarHabitaciones(
+            Habitacion.TipoHabitacion tipo,
+            Habitacion.EstadoHabitacion estado,
+            Boolean disponible,
+            BigDecimal precioMin,
+            BigDecimal precioMax) {
+        Specification<Habitacion> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (tipo != null) {
+                predicates.add(criteriaBuilder.equal(root.get("tipo"), tipo));
+            }
+            if (estado != null) {
+                predicates.add(criteriaBuilder.equal(root.get("estado"), estado));
+            }
+            if (disponible != null) {
+                predicates.add(criteriaBuilder.equal(root.get("disponible"), disponible));
+            }
+            if (precioMin != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("precio"), precioMin));
+            }
+            if (precioMax != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("precio"), precioMax));
+            }
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+        return habitacionRepositorio.findAll(spec).stream()
+                .map(HabitacionDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HabitacionDTO> buscarHabitacionesDisponiblesParaFechas(
+            LocalDate fechaLlegada,
+            LocalDate fechaSalida,
+            Habitacion.TipoHabitacion tipo) {
+        if (fechaLlegada == null || fechaSalida == null || fechaLlegada.isAfter(fechaSalida) || fechaLlegada.isEqual(fechaSalida)) {
+            throw new IllegalArgumentException("Fechas de llegada y salida inválidas para la búsqueda.");
+        }
+
+        List<Habitacion> habitacionesCandidatas;
+        if (tipo != null) {
+            habitacionesCandidatas = habitacionRepositorio.findByTipo(tipo);
+        } else {
+            habitacionesCandidatas = habitacionRepositorio.findAll();
         }
         
-        // Verificar si el número de habitación está siendo modificado y ya existe
-        if (habitacionDTO.getNumero() != null && 
-                !habitacionDTO.getNumero().equals(habitacionExistente.get().getNumero()) &&
-                habitacionRepositorio.existsByNumero(habitacionDTO.getNumero())) {
-            throw new RuntimeException("Ya existe una habitación con el número: " + habitacionDTO.getNumero());
+        List<Integer> numerosHabitacionesOcupadas = reservaRepositorio
+                .findReservasActivasSolapadas(null, fechaLlegada, fechaSalida)
+                .stream()
+                .map(reserva -> reserva.getHabitacion().getNumeroHabitacion())
+                .distinct()
+                .toList();
+
+        return habitacionesCandidatas.stream()
+                .filter(habitacion -> !numerosHabitacionesOcupadas.contains(habitacion.getNumeroHabitacion()))
+                .map(HabitacionDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public HabitacionDTO actualizarEstadoHabitacion(Integer numeroHabitacion, Habitacion.EstadoHabitacion nuevoEstado) {
+        Habitacion habitacion = obtenerHabitacionEntidadPorNumero(numeroHabitacion)
+                .orElseThrow(() -> new RuntimeException("Habitación no encontrada con número: " + numeroHabitacion));
+        
+        habitacion.setEstado(nuevoEstado);
+        if (nuevoEstado == Habitacion.EstadoHabitacion.OCUPADO) {
+            habitacion.setDisponible(false);
+        } else if (nuevoEstado == Habitacion.EstadoHabitacion.LIBRE || nuevoEstado == Habitacion.EstadoHabitacion.LIMPIEZA) {
+             List<Reserva> reservasHoy = reservaRepositorio.findReservasActivasSolapadas(numeroHabitacion, LocalDate.now(), LocalDate.now().plusDays(1));
+             habitacion.setDisponible(reservasHoy.isEmpty());
         }
-        
-        Habitacion habitacion = habitacionExistente.get();
-        actualizarDatosEntidad(habitacion, habitacionDTO);
-        
         Habitacion actualizada = habitacionRepositorio.save(habitacion);
-        return convertirADTO(actualizada);
+        return new HabitacionDTO(actualizada);
     }
-    
+
     @Override
     @Transactional
-    public boolean eliminar(Integer id) {
-        if (habitacionRepositorio.existsById(id)) {
-            habitacionRepositorio.deleteById(id);
-            return true;
+    public HabitacionDTO actualizarPrecioHabitacion(Integer numeroHabitacion, BigDecimal nuevoPrecio) {
+        if (nuevoPrecio == null || nuevoPrecio.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("El precio no puede ser nulo o negativo.");
         }
-        return false;
-    }
-    
-    @Override
-    @Transactional
-    public boolean cambiarEstado(Integer id, String nuevoEstado) {
-        Optional<Habitacion> habitacionOpt = habitacionRepositorio.findById(id);
-        
-        if (habitacionOpt.isEmpty()) {
-            return false;
-        }
-        
-        try {
-            Habitacion.EstadoHabitacion estadoEnum = Habitacion.EstadoHabitacion.valueOf(nuevoEstado.toUpperCase());
-            Habitacion habitacion = habitacionOpt.get();
-            habitacion.setEstado(estadoEnum);
-            habitacionRepositorio.save(habitacion);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
-    
-    // Métodos auxiliares para conversión entre entidad y DTO
-    private HabitacionDTO convertirADTO(Habitacion habitacion) {
-        return new HabitacionDTO(
-                habitacion.getIdHabitacion(),
-                habitacion.getNumero(),
-                habitacion.getTipo().name(),
-                habitacion.getCapacidad(),
-                habitacion.getTarifaBase(),
-                habitacion.getEstado().name(),
-                habitacion.getDescripcion()
-        );
-    }
-    
-    private Habitacion convertirAEntidad(HabitacionDTO dto) {
-        Habitacion habitacion = new Habitacion();
-        
-        if (dto.getIdHabitacion() != null) {
-            habitacion.setIdHabitacion(dto.getIdHabitacion());
-        }
-        
-        habitacion.setNumero(dto.getNumero());
-        
-        if (dto.getTipo() != null) {
-            habitacion.setTipo(Habitacion.TipoHabitacion.valueOf(dto.getTipo().toUpperCase()));
-        }
-        
-        habitacion.setCapacidad(dto.getCapacidad());
-        habitacion.setTarifaBase(dto.getTarifaBase());
-        
-        if (dto.getEstado() != null) {
-            habitacion.setEstado(Habitacion.EstadoHabitacion.valueOf(dto.getEstado().toUpperCase()));
-        }
-        
-        habitacion.setDescripcion(dto.getDescripcion());
-        
-        return habitacion;
-    }
-    
-    private void actualizarDatosEntidad(Habitacion habitacion, HabitacionDTO dto) {
-        if (dto.getNumero() != null) {
-            habitacion.setNumero(dto.getNumero());
-        }
-        
-        if (dto.getTipo() != null) {
-            habitacion.setTipo(Habitacion.TipoHabitacion.valueOf(dto.getTipo().toUpperCase()));
-        }
-        
-        if (dto.getCapacidad() != null) {
-            habitacion.setCapacidad(dto.getCapacidad());
-        }
-        
-        if (dto.getTarifaBase() != null) {
-            habitacion.setTarifaBase(dto.getTarifaBase());
-        }
-        
-        if (dto.getEstado() != null) {
-            habitacion.setEstado(Habitacion.EstadoHabitacion.valueOf(dto.getEstado().toUpperCase()));
-        }
-        
-        if (dto.getDescripcion() != null) {
-            habitacion.setDescripcion(dto.getDescripcion());
-        }
+        Habitacion habitacion = obtenerHabitacionEntidadPorNumero(numeroHabitacion)
+                .orElseThrow(() -> new RuntimeException("Habitación no encontrada con número: " + numeroHabitacion));
+        habitacion.setPrecio(nuevoPrecio);
+        Habitacion actualizada = habitacionRepositorio.save(habitacion);
+        return new HabitacionDTO(actualizada);
     }
 }
