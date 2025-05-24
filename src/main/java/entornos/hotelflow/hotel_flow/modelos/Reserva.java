@@ -3,57 +3,53 @@ package entornos.hotelflow.hotel_flow.modelos;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.time.LocalDate;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "Reservas")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Reserva {
-    
+
+    public enum EstadoReserva {
+        PAGADA, NO_PAGADA, CANCELADA, ACTIVA 
+    }
+
+    public enum TipoPagoReserva {
+        EFECTIVO, NEQUI, BANCOLOMBIA
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_reserva")
     private Integer idReserva;
 
-    @ManyToOne(fetch = FetchType.LAZY) 
-    @JoinColumn(name = "id_usuario", nullable = false)
-    private Usuario usuario; 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cliente", nullable = false)
+    private Cliente cliente;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_habitacion", nullable = false)
+    @JoinColumn(name = "numero_habitacion", nullable = false)
     private Habitacion habitacion;
 
-    @Column(name = "fecha_entrada", nullable = false)
-    private LocalDateTime fechaEntrada;
+    @Column(name = "fecha_llegada_estadia", nullable = false) 
+    private LocalDate fechaLlegadaEstadia;
 
-    @Column(name = "fecha_salida", nullable = false)
-    private LocalDateTime fechaSalida;
+    @Column(name = "fecha_salida_estadia", nullable = false)
+    private LocalDate fechaSalidaEstadia;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private EstadoReserva estado;
+    @Column(columnDefinition = "ENUM('PAGADA', 'NO_PAGADA', 'CANCELADA', 'ACTIVA') DEFAULT 'NO_PAGADA'")
+    private EstadoReserva estado = EstadoReserva.NO_PAGADA;
 
-    @Column(name = "total_reserva", nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalReserva;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_pago", nullable = false)
+    private TipoPagoReserva tipoPago;
 
-    @Column(name = "fecha_creacion", updatable = false)
-    private LocalDateTime fechaCreacion;
-
-    public enum EstadoReserva {
-        CONFIRMADA, PENDIENTE, CANCELADA
-    }
-
-    @PrePersist //funcion para tener un default de estado
-    public void prePersist() {
-        this.fechaCreacion = LocalDateTime.now();
-        if (this.estado == null) {
-            this.estado = EstadoReserva.PENDIENTE;
-        }
-    }
-
-    // Constructor vacío (requerido por JPA)
-    public Reserva() {
-    }
+    @Column(name = "fecha_reserva", nullable = false) 
+    private LocalDate fechaReserva;
 }

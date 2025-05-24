@@ -1,84 +1,38 @@
 package entornos.hotelflow.hotel_flow.modelos;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+
+
 import java.math.BigDecimal;
 
+@Getter
+@Setter
+@NoArgsConstructor 
 public class HabitacionDTO {
-    private Integer idHabitacion;
-    private String numero;
+    private Integer numeroHabitacion;
     private String tipo;
-    private Integer capacidad;
-    private BigDecimal tarifaBase;
+    private String climatizacion;
     private String estado;
-    private String descripcion;
-    
-    // Constructors
-    public HabitacionDTO() {
+    private Boolean disponible;
+    private BigDecimal precio;
+
+    // **** ESTE ES EL CONSTRUCTOR CRUCIAL ****
+    // Permite crear un HabitacionDTO a partir de una entidad Habitacion
+    public HabitacionDTO(Habitacion habitacion) {
+        this.numeroHabitacion = habitacion.getNumeroHabitacion();
+        if (habitacion.getTipo() != null) {
+            this.tipo = habitacion.getTipo().name(); // Convierte el Enum a String
+        }
+        if (habitacion.getClimatizacion() != null) {
+            this.climatizacion = habitacion.getClimatizacion().name(); // Convierte el Enum a String
+        }
+        if (habitacion.getEstado() != null) {
+            this.estado = habitacion.getEstado().name(); // Convierte el Enum a String
+        }
+        this.disponible = habitacion.getDisponible();
+        this.precio = habitacion.getPrecio();
     }
-    
-    public HabitacionDTO(Integer idHabitacion, String numero, String tipo, Integer capacidad,
-                       BigDecimal tarifaBase, String estado, String descripcion) {
-        this.idHabitacion = idHabitacion;
-        this.numero = numero;
-        this.tipo = tipo;
-        this.capacidad = capacidad;
-        this.tarifaBase = tarifaBase;
-        this.estado = estado;
-        this.descripcion = descripcion;
-    }
-    
-    // Getters and Setters
-    public Integer getIdHabitacion() {
-        return idHabitacion;
-    }
-    
-    public void setIdHabitacion(Integer idHabitacion) {
-        this.idHabitacion = idHabitacion;
-    }
-    
-    public String getNumero() {
-        return numero;
-    }
-    
-    public void setNumero(String numero) {
-        this.numero = numero;
-    }
-    
-    public String getTipo() {
-        return tipo;
-    }
-    
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-    
-    public Integer getCapacidad() {
-        return capacidad;
-    }
-    
-    public void setCapacidad(Integer capacidad) {
-        this.capacidad = capacidad;
-    }
-    
-    public BigDecimal getTarifaBase() {
-        return tarifaBase;
-    }
-    
-    public void setTarifaBase(BigDecimal tarifaBase) {
-        this.tarifaBase = tarifaBase;
-    }
-    
-    public String getEstado() {
-        return estado;
-    }
-    
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-    
-    public String getDescripcion() {
-        return descripcion;
-    }
-    
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
+
 }
