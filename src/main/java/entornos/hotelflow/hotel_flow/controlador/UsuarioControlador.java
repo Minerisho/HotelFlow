@@ -53,10 +53,10 @@ public class UsuarioControlador {
     //Actualizar un Usuario
     @PutMapping("/")
     public ResponseEntity<Usuario> editar(@RequestBody Usuario usuario){
-        Usuario obj = usuarioService.buscarUsuario(usuario.getIdUsuario());
+        Usuario obj = usuarioService.buscarUsuario(usuario.getId());
         if (obj != null) {
-            obj.setCorreoElectronico(usuario.getCorreoElectronico());
-            obj.setContrasena(usuario.getContrasena());
+            obj.setUsername(usuario.getUsername());
+            obj.setPassword(usuario.getPassword());
         }else{
             return new ResponseEntity<>(obj,HttpStatus.INTERNAL_SERVER_ERROR);
         }

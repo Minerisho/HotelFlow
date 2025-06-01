@@ -13,14 +13,14 @@ public class Usuario {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_usuario")
-    private Long idUsuario;
+    @Column(name = "id")
+    private Long id;
 
-    @Column(name = "correo_electronico", nullable = false, unique = true)
-    private String correoElectronico;
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
 
     @Column(nullable = false)
-    private String contrasena;
+    private String password;
 
     @Column(nullable = false)
     private String nombre;
@@ -32,20 +32,20 @@ public class Usuario {
     @Column(nullable = false)
     private Rol rol;
     
-    @Column(name = "fecha_creacion", updatable = false)
-    private LocalDateTime fechaCreacion;
+   // @Column(name = "fecha_creacion", updatable = false)
+   // private LocalDateTime fechaCreacion;
     
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Estado estado;
+   // @Enumerated(EnumType.STRING)
+   // @Column(nullable = false)
+    //private Estado estado;
     
-    @PrePersist
-    public void prePersist() {
-        this.fechaCreacion = LocalDateTime.now();
-        if (this.estado == null) {
-            this.estado = Estado.ACTIVO;
-        }
-    }
+   // @PrePersist
+    //public void prePersist() {
+     //   this.fechaCreacion = LocalDateTime.now();
+      //  if (this.estado == null) {
+       //     this.estado = Estado.ACTIVO;
+        //}
+   // }
     
     public static enum Rol {
         ADMIN,
@@ -54,8 +54,8 @@ public class Usuario {
         HUESPED
     }
     
-    public static enum Estado {
-        ACTIVO,
-        INACTIVO
-    }
+  //  public static enum Estado {
+    //    ACTIVO,
+     //   INACTIVO
+   // }
 }

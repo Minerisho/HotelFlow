@@ -1,7 +1,9 @@
 package entornos.hotelflow.hotel_flow.controlador;
 
+import entornos.hotelflow.hotel_flow.modelos.Cliente;
 import entornos.hotelflow.hotel_flow.modelos.Habitacion;
 import entornos.hotelflow.hotel_flow.modelos.HabitacionDTO;
+import entornos.hotelflow.hotel_flow.servicio.IClienteServicio;
 import entornos.hotelflow.hotel_flow.servicio.IHabitacionServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -151,4 +153,24 @@ public class HabitacionControlador {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
     }
+
+    @Autowired
+    private IClienteServicio clienteServicio;
+
+    @GetMapping("/{numeroHabitacion}/cliente")
+    public ResponseEntity<Cliente> obtenerClientePorHabitacion(@PathVariable Integer numeroHabitacion) {
+    return clienteServicio.buscarClientePorHabitacion(numeroHabitacion)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+}
+
+@PutMapping("/habitaciones/{numero}/estado")
+public ResponseEntity<HabitacionDTO> cambiarEstadoHabitacion(
+        @PathVariable Integer numero,
+        @RequestParam("estado") Habitacion.EstadoHabitacion nuevoEstado) {
+    HabitacionDTO actualizada = habitacionServicio.actualizarEstadoHabitacion(numero, nuevoEstado);
+    return ResponseEntity.ok(actualizada);
+}
+
+
 }

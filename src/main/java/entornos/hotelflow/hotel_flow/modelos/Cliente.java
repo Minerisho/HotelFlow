@@ -7,12 +7,16 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "Clientes")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class Cliente {
 
     public enum GeneroCliente {
@@ -69,4 +73,6 @@ public class Cliente {
 
     @Column(length = 100)
     private String eps;
+
+
 }

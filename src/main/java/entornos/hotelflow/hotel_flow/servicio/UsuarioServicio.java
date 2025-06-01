@@ -56,13 +56,13 @@ public class UsuarioServicio implements IUsuarioServicio {
     }
 
     @Override
-    public int login(String correo, String contrasena) {
-        return usuarioRepositorio.login(correo, contrasena);
+    public int login(String username, String password) {
+        return usuarioRepositorio.login(username, password);
     }
 
     @Override
     public Usuario ingresar(LoginDTO loginDto) {
-        Optional<Usuario> optUsuario = usuarioRepositorio.ingresar(loginDto.getCorreoElectronico(), loginDto.getContrasena());
+        Optional<Usuario> optUsuario = usuarioRepositorio.ingresar(loginDto.getUsername(), loginDto.getPassword());
         return optUsuario.orElse(null);
     
     }

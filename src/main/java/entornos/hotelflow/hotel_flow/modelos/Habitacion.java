@@ -7,8 +7,12 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor; 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "Habitaciones")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 @Getter
 @Setter
 @NoArgsConstructor 

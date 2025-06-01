@@ -11,5 +11,7 @@ import java.util.Optional;
 public interface ClienteRepositorio extends JpaRepository<Cliente, Integer> {
     Optional<Cliente> findByCedula(String cedula);
     List<Cliente> findByApellidosContainingIgnoreCase(String apellidos);
+    Optional<Cliente> findByHabitacion_NumeroHabitacion(Integer numeroHabitacion);
+
     
 }

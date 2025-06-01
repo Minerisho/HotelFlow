@@ -1,6 +1,8 @@
 package entornos.hotelflow.hotel_flow.controlador;
 
+import entornos.hotelflow.hotel_flow.modelos.AsignacionHabitacionRequest;
 import entornos.hotelflow.hotel_flow.modelos.Cliente;
+import entornos.hotelflow.hotel_flow.modelos.Habitacion;
 import entornos.hotelflow.hotel_flow.servicio.IClienteServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,4 +81,24 @@ public class ClienteControlador {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         }
     }
+
+    @PatchMapping("/{idCliente}/asignar-habitacion")
+public ResponseEntity<?> asignarHabitacion(
+        @PathVariable Integer idCliente,
+        @RequestBody AsignacionHabitacionRequest request
+) {
+    Cliente cliente = clienteServicio.buscarClientePorId(idCliente)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente no encontrado"));
+
+    Habitacion habitacion = new Habitacion();
+    habitacion.setNumeroHabitacion(request.getNumeroHabitacion());
+
+    cliente.setHabitacion(habitacion); // <- AQUÍ está la relación
+    clienteServicio.actualizarCliente(idCliente, cliente);
+
+    return ResponseEntity.ok("Habitación asignada correctamente");
 }
+
+
+}
+

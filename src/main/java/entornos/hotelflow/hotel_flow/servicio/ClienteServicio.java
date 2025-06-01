@@ -1,7 +1,10 @@
 package entornos.hotelflow.hotel_flow.servicio;
 
 import entornos.hotelflow.hotel_flow.modelos.Cliente;
+import entornos.hotelflow.hotel_flow.modelos.Habitacion;
 import entornos.hotelflow.hotel_flow.repositorio.ClienteRepositorio;
+import entornos.hotelflow.hotel_flow.repositorio.HabitacionRepositorio;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +17,18 @@ public class ClienteServicio implements IClienteServicio {
 
     @Autowired
     private ClienteRepositorio clienteRepositorio;
+
+    @Autowired
+    private HabitacionRepositorio habitacionRepositorio;
+
+    
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Cliente> buscarClientePorHabitacion(Integer numeroHabitacion) {
+        return clienteRepositorio.findByHabitacion_NumeroHabitacion(numeroHabitacion);
+    }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -36,12 +51,25 @@ public class ClienteServicio implements IClienteServicio {
     @Override
     @Transactional
     public Cliente guardarCliente(Cliente cliente) {
-        if (cliente.getCedula() != null && clienteRepositorio.findByCedula(cliente.getCedula()).isPresent()) {
-            throw new IllegalArgumentException("Ya existe un cliente con la cédula: " + cliente.getCedula());
-        }
-        // Aquí puedes añadir más validaciones
-        return clienteRepositorio.save(cliente);
+    if (cliente.getCedula() != null && clienteRepositorio.findByCedula(cliente.getCedula()).isPresent()) {
+        throw new IllegalArgumentException("Ya existe un cliente con la cédula: " + cliente.getCedula());
     }
+
+    // ✅ Si el cliente ya trae una habitación asignada
+    if (cliente.getHabitacion() != null) {
+        Integer numeroHabitacion = cliente.getHabitacion().getNumeroHabitacion();
+        Habitacion habitacion = habitacionRepositorio.findById(numeroHabitacion)
+                .orElseThrow(() -> new RuntimeException("Habitación no encontrada: " + numeroHabitacion));
+
+        // ✅ Cambiamos el estado a OCUPADA
+        habitacion.setEstado(Habitacion.EstadoHabitacion.OCUPADO);
+
+        habitacionRepositorio.save(habitacion); // Guardamos el nuevo estado
+        cliente.setHabitacion(habitacion); // Asignamos la habitación actualizada al cliente
+    }
+
+    return clienteRepositorio.save(cliente);
+}
 
     @Override
     @Transactional

@@ -13,4 +13,7 @@ public interface IClienteServicio {
     Cliente actualizarCliente(Integer idCliente, Cliente clienteDetalles);
     void eliminarCliente(Integer idCliente);
     List<Cliente> buscarPorApellidos(String apellidos);
+    Optional<Cliente> buscarClientePorHabitacion(Integer numeroHabitacion);
+    
+
 }

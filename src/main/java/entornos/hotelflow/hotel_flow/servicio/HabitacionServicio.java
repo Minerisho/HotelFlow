@@ -3,6 +3,7 @@ package entornos.hotelflow.hotel_flow.servicio;
 import entornos.hotelflow.hotel_flow.modelos.Habitacion;
 import entornos.hotelflow.hotel_flow.modelos.HabitacionDTO;
 import entornos.hotelflow.hotel_flow.modelos.Reserva; // Importado para lógica de eliminación
+import entornos.hotelflow.hotel_flow.repositorio.ClienteRepositorio;
 import entornos.hotelflow.hotel_flow.repositorio.HabitacionRepositorio;
 import entornos.hotelflow.hotel_flow.repositorio.ReservaRepositorio; // Importado para lógica de eliminación y disponibilidad
 import jakarta.persistence.criteria.Predicate; // Para Specification
@@ -27,7 +28,13 @@ public class HabitacionServicio implements IHabitacionServicio {
     @Autowired
     private ReservaRepositorio reservaRepositorio; // Para verificar disponibilidad y dependencias
 
+    @Autowired
+    private ClienteRepositorio clienteRepositorio;
+
     // --- Implementación de métodos solicitados por el compilador ---
+
+
+    
 
     @Override
     @Transactional(readOnly = true)
