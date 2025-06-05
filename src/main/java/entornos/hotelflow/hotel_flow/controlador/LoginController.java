@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-
-
 @RestController
 @RequestMapping("/api/login")
 public class LoginController {
@@ -22,21 +20,20 @@ public class LoginController {
     @Autowired
     private IUsuarioServicio usuarioServicio;
 
-    // Endpoint que devuelve la cantidad de coincidencias (loginClient)
     @PostMapping("/loginclient")
     public ResponseEntity<Integer> loginClient(@RequestBody LoginDTO loginDto) {
-        int resultado = usuarioServicio.login(loginDto.getCorreoElectronico(), loginDto.getContrasena());
+        // Usar getUsername() de LoginDTO y pasar getContrasena() como el 'password' esperado por el servicio
+        int resultado = usuarioServicio.login(loginDto.getUsername(), loginDto.getContrasena());
         return new ResponseEntity<>(resultado, HttpStatus.OK);
     }
 
-    // Endpoint que retorna el objeto Usuario (ingresar)
     @PostMapping("/ingresar")
     public ResponseEntity<?> ingresar(@RequestBody LoginDTO loginDto) {
+        // El servicio 'ingresar' ya toma LoginDTO y manejará el getUsername() internamente.
         Usuario usuario = usuarioServicio.ingresar(loginDto);
         if (usuario == null) {
             return new ResponseEntity<>("Credenciales inválidas", HttpStatus.UNAUTHORIZED);
         }
-        // En un escenario real, aquí se puede generar un token o información adicional.
         return new ResponseEntity<>(usuario, HttpStatus.OK);
     }
 }

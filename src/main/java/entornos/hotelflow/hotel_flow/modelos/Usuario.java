@@ -3,59 +3,42 @@ package entornos.hotelflow.hotel_flow.modelos;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "Usuarios")
+@Table(name = "Usuarios") // Asegúrate que el nombre de la tabla coincida con tu BD; en el script es 'Usuarios'
 public class Usuario {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_usuario")
-    private Long idUsuario;
+    @Column(name = "id") // Mapeado a la columna 'id' de la BD
+    private Long id;
 
-    @Column(name = "correo_electronico", nullable = false, unique = true)
-    private String correoElectronico;
+    @Column(name = "username", nullable = false, unique = true) // Mapeado a 'username'
+    private String username;
 
-    @Column(nullable = false)
-    private String contrasena;
+    @Column(name = "password", nullable = false) // Mapeado a 'password'
+    private String password;
 
-    @Column(nullable = false)
+    @Column(name = "nombre")
     private String nombre;
 
-    @Column(nullable = false)
+    @Column(name = "apellido")
     private String apellido;
-    
+
+    @Column(name = "cedula", unique = true) // Mapeado a 'cedula', asumiendo que debe ser único si existe
+    private String cedula;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "rol", nullable = false) // Mapeado a 'rol'
     private Rol rol;
-    
-    @Column(name = "fecha_creacion", updatable = false)
-    private LocalDateTime fechaCreacion;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Estado estado;
-    
-    @PrePersist
-    public void prePersist() {
-        this.fechaCreacion = LocalDateTime.now();
-        if (this.estado == null) {
-            this.estado = Estado.ACTIVO;
-        }
-    }
-    
+
+    // Enum Rol limitado a los valores de la BD
     public static enum Rol {
         ADMIN,
-        RECEPCIONISTA,
-        CAJERO,
-        HUESPED
+        RECEPCIONISTA
     }
-    
-    public static enum Estado {
-        ACTIVO,
-        INACTIVO
-    }
+
+    // Campos 'fechaCreacion', 'estado' y método 'prePersist' eliminados
 }

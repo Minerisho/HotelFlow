@@ -8,15 +8,17 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Clientes")
+@Table(name = "Clientes") // O "clientes" si decides mantener minúsculas en BD y ajustar aquí
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Cliente {
 
-    public enum GeneroCliente {
-        MASCULINO, FEMENINO, OTRO
+    public enum GeneroCliente { // Esta definición ya coincide con tu BD corregida
+        MASCULINO, 
+        FEMENINO, 
+        OTRO
     }
 
     @Id
@@ -40,7 +42,7 @@ public class Cliente {
     private LocalDate fechaNacimiento;
 
     @Enumerated(EnumType.STRING)
-    private GeneroCliente genero;
+    private GeneroCliente genero; // Mapeará directamente si la BD y el enum Java coinciden
 
     @Column(length = 50)
     private String profesion;
@@ -51,15 +53,7 @@ public class Cliente {
     @Column(length = 100)
     private String destino;
 
-    @Column(name = "fecha_llegada")
-    private LocalDate fechaLlegada;
-
-    @Column(name = "fecha_salida")
-    private LocalDate fechaSalida;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "numero_habitacion") 
-    private Habitacion habitacion;
+    // Campos fechaLlegada, fechaSalida y habitacion eliminados
 
     @Column(length = 100)
     private String correo;

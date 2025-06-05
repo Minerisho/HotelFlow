@@ -64,10 +64,7 @@ public class ClienteServicio implements IClienteServicio {
         clienteExistente.setGenero(clienteDetalles.getGenero());
         clienteExistente.setProfesion(clienteDetalles.getProfesion());
         clienteExistente.setProcedencia(clienteDetalles.getProcedencia());
-        clienteExistente.setDestino(clienteDetalles.getDestino());
-        clienteExistente.setFechaLlegada(clienteDetalles.getFechaLlegada()); 
-        clienteExistente.setFechaSalida(clienteDetalles.getFechaSalida());  
-        clienteExistente.setHabitacion(clienteDetalles.getHabitacion());     
+        clienteExistente.setDestino(clienteDetalles.getDestino());  
         clienteExistente.setCorreo(clienteDetalles.getCorreo());
         clienteExistente.setTelefonoEmergencia(clienteDetalles.getTelefonoEmergencia());
         clienteExistente.setEps(clienteDetalles.getEps());

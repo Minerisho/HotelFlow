@@ -11,16 +11,10 @@ import entornos.hotelflow.hotel_flow.modelos.Usuario;
 import entornos.hotelflow.hotel_flow.repositorio.UsuarioRepositorio;
 import jakarta.transaction.Transactional;
 
-
-/**
- *
- * @author Usuario
- */
 @Service
 @Transactional
 public class UsuarioServicio implements IUsuarioServicio {
     
-    //Atributo del repositorio
     @Autowired
     UsuarioRepositorio usuarioRepositorio;
 
@@ -29,40 +23,43 @@ public class UsuarioServicio implements IUsuarioServicio {
         return usuarioRepositorio.findAll();
     }
 
-    @Override
-    public List<Usuario> getUsuarioHuesped(){
-        return usuarioRepositorio.obtenerUsuariosHuesped();
-    }
+    // ELIMINADO: getUsuarioHuesped()
     
     @Override
     public Usuario buscarUsuario(Long id) {
-        Usuario usuario = null;
-        usuario = usuarioRepositorio.findById(id).orElse(null);
-        if (usuario == null) {
-            return null;
-        }
+        // El método findById del repositorio ya espera el tipo de la PK de Usuario, que es Long.
+        // El campo 'id' en la entidad Usuario es Long.
+        Usuario usuario = usuarioRepositorio.findById(id).orElse(null);
+        // No es necesario comprobar 'if (usuario == null)' aquí, orElse(null) ya lo maneja.
+        // El controlador o quien llame al servicio debería manejar el caso de 'null'.
         return usuario;
     }
 
     @Override
     public Usuario nuevoUsuario(Usuario usuario) {
+        // La entidad Usuario que llega aquí ya debería tener los campos correctos
+        // (id, username, password, nombre, apellido, cedula, rol).
+        // Las validaciones de unicidad para 'username' y 'cedula' están en la BD
+        // y en las anotaciones de la entidad. Si se viola, saltará una DataIntegrityViolationException.
         return usuarioRepositorio.save(usuario);
     }
 
     @Override
     public int borrarUsuario(Long id) {
        usuarioRepositorio.deleteById(id);
-       return 1;
+       return 1; // Retornar 1 podría indicar éxito, aunque void sería más común si no hay estados de error complejos.
     }
 
     @Override
-    public int login(String correo, String contrasena) {
-        return usuarioRepositorio.login(correo, contrasena);
+    public int login(String username, String password) { // Parámetros actualizados
+        return usuarioRepositorio.login(username, password); // Argumentos actualizados
     }
 
     @Override
     public Usuario ingresar(LoginDTO loginDto) {
-        Optional<Usuario> optUsuario = usuarioRepositorio.ingresar(loginDto.getCorreoElectronico(), loginDto.getContrasena());
+        // LoginDTO ahora tiene getUsername() en lugar de getCorreoElectronico()
+        // y el repositorio espera 'username' y 'password'
+        Optional<Usuario> optUsuario = usuarioRepositorio.ingresar(loginDto.getUsername(), loginDto.getContrasena());
         return optUsuario.orElse(null);
     
     }

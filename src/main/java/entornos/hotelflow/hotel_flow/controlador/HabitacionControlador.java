@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/habitaciones")
-@CrossOrigin(origins = "*") // Ajusta en producción
+@CrossOrigin(origins = "*") 
 public class HabitacionControlador {
 
     @Autowired
